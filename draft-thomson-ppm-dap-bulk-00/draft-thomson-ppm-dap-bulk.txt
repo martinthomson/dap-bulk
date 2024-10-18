@@ -1,0 +1,318 @@
+
+
+
+
+Privacy Preserving Measurement                                M. Thomson
+Internet-Draft                                                   Mozilla
+Intended status: Informational                               A. Koshelev
+Expires: 21 April 2025                                              Meta
+                                                         18 October 2024
+
+
+   Bulk Report Submission for Distributed Aggregation Protocol (DAP)
+                   draft-thomson-ppm-dap-bulk-latest
+
+Abstract
+
+   A bulk report submission endpoint and format are described for the
+   Distributed Aggregation Protocol (DAP).  This provides modest, but
+   meaningful, efficiency benefits over the core protocol for cases
+   where an intermediary is able to collect large numbers of reports.
+
+About This Document
+
+   This note is to be removed before publishing as an RFC.
+
+   The latest revision of this draft can be found at
+   https://martinthomson.github.io/dap-bulk/draft-thomson-ppm-dap-
+   bulk.html.  Status information for this document may be found at
+   https://datatracker.ietf.org/doc/draft-thomson-ppm-dap-bulk/.
+
+   Discussion of this document takes place on the Privacy Preserving
+   Measurement Working Group mailing list (mailto:ppm@ietf.org), which
+   is archived at https://mailarchive.ietf.org/arch/browse/ppm/.
+   Subscribe at https://www.ietf.org/mailman/listinfo/ppm/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/martinthomson/dap-bulk.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 21 April 2025.
+
+Copyright Notice
+
+   Copyright (c) 2024 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Conventions and Definitions
+   3.  Bulk Submissions Endpoint
+   4.  Bulk Submission Format
+     4.1.  Necessary Changes to DAP Report Formats
+     4.2.  Optional Removal of Existing Report Extensions
+   5.  Security Considerations
+   6.  IANA Considerations
+   7.  References
+     7.1.  Normative References
+     7.2.  Informative References
+   Acknowledgments
+   Authors' Addresses
+
+1.  Introduction
+
+   The Distributed Aggregation Protocol (DAP) [DAP] accepts reports from
+   many clients and aggregates them in a manner that protects individual
+   contributions.  The core protocol requires that each report be
+   submitted to the DAP leader.
+
+   The assumption implicit in this design is that reports are submitted
+   directly by clients.  This is not necessary for security reasons due
+   to the encryption used (this encryption is necessary for the portion
+   of reports that is intended for DAP helpers).  Clients could instead
+   pass their reports to an intermediary for forwarding.
+
+   Use of an intermediary reduces the availability requirements of
+   aggregators and might remove the need for anonymizing proxy to
+   protect client identity from the server (such as the use of Oblivious
+   HTTP [RFC9458] as described in Section 7.4 of [DAP]).  It also
+   creates an opportunity to amortize the overheads involved in report
+   submission.
+
+   This document defines a bulk submissions endpoint for DAP and defines
+   a report submission format for use with that endpoint.
+
+2.  Conventions and Definitions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+3.  Bulk Submissions Endpoint
+
+   DAP defines the {leader}/tasks/{task-id}/reports resource for report
+   submission for a task.  This document extends DAP to define the
+   {leader}/tasks/{task-id}/reports/bulk resource for bulk report
+   submission for a task.
+
+   Clients can send a HTTP POST request to this resource with a payload
+   in the bulk submission format (Section 4).  A bulk request is
+   equivalent to multiple separate submissions.
+
+   A DAP leader MAY accept bulk submissions at the regular "reports"
+   resource.
+
+4.  Bulk Submission Format
+
+   The "application/dap-bulk-report" format contains a header that
+   encodes extensions that are common to all reports.  The header is
+   followed by any number of reports, from which those shared fields are
+   removed.
+
+   struct {
+     Extension common_extensions<0..2^16-1>;
+     Report report[REPORT_COUNT];
+   } BulkReport;
+
+                        Figure 1: Bulk Report Format
+
+   The common_extensions field contains common extensions that are added
+   to the set of public report extensions in each report that follows.
+   Reports that include values for any common extension override the
+   value in the common extension.
+
+      |  It is slightly more intrusive and fragile, but we should
+      |  consider removing the extensions field from ReportMetadata as
+      |  well.  Repeating those two bytes isn't a huge problem, but it's
+      |  pretty cheap.  It also removes the last clause from the
+      |  preceding paragraph.
+
+   The header is followed by any number of reports, which are encoded
+   exactly as described in [DAP], except as noted in Section 4.1.  The
+   use of REPORT_COUNT in Figure 1 is a small abuse of the TLS syntax to
+   signify that any number of reports are included.  This "value" could
+   be any positive integer.  Unlike a variable-length field, as denoted
+   with &lt; and >, this format does not require that the size of all
+   included reports be known before constructing a request.
+
+4.1.  Necessary Changes to DAP Report Formats
+
+   DAP currently encodes report extensions in the plaintext of shares.
+   For extensions that contain public information this is inefficient
+   for a couple of reasons:
+
+   *  Multiple copies of the data is included.
+
+   *  The use of per-record encryption prevents compression.
+
+   This document recommends the addition of a new public report
+   extensions field to the ReportMetadata structure.  This would be
+   modified to include extensions that are public, as shown in Figure 2.
+
+   struct {
+     ReportID report_id;
+     Time time;
+     Extension extensions<0..2^16-1>; /* new */
+   } ReportMetadata;
+
+                 Figure 2: Proposed Report Metadata Format
+
+   This would be sufficient for many extensions, such as those that are
+   defined in [DAP-DP-EXT].  As with the current design (Section 4.5.3
+   of [DAP]), unknown extensions would result in the report being
+   rejected.  The primary difference being that the leader can determine
+   this before initiating the preparation phase.
+
+4.2.  Optional Removal of Existing Report Extensions
+
+   The existing report extensions could also potentially be removed, as
+   shown in Figure 3.
+
+   opaque PlaintextInputShare<0..2^32-1>;
+
+   /* the old format, for reference:
+   struct {
+     Extension extensions<0..2^16-1>;
+     opaque payload<0..2^32-1>;
+   } PlaintextInputShare;
+   */
+
+                 Figure 3: Proposed Plaintext Share Format
+
+   These private extensions currently have no defined purpose and add
+   two bytes per aggregator to every report.  The risk of removing them
+   is that a purpose for a generic extension is discovered at some point
+   in the future.  Though specific VDAF instantiations might define
+   their own extension container, this decision might limit the
+   availability of extensions that apply to any VDAF.
+
+5.  Security Considerations
+
+   Report metadata, which would include the extensions if the
+   recommendations in Section 4.1 are adopted, are included in the
+   additional associated data for every report.  Bulk submission is
+   therefore strictly a performance optimization as far as the operation
+   of DAP is concerned.
+
+   The potential for a single client to generate large amounts of work
+   for a DAP service is a serious threat to service availability.  Any
+   DAP leader SHOULD implement measures to defend against resource
+   exhaustion attacks through this interface.  This might include strong
+   authentication of the requester.  The logical entity to make this
+   request is a collector, which is likely to be known to the leader.
+
+   The addition of public extensions exposes more information to the
+   leader.  This might be used by a malicious leader to selectively
+   remove reports.  A leader is already able to do this without helper
+   awareness, but the added information might allow this to be more
+   selective.
+
+6.  IANA Considerations
+
+   IANA is requested to register at time of publication the
+   "application/dap-bulk-report" media type in the "Media Types"
+   registry at <https://iana.org/assignments/media-types>, following the
+   procedures of [RFC6838].  That registration includes the following:
+
+   Type name:  application
+   Subtype name:  dap-bulk-report
+   Required parameters:  N/A
+   Optional parameters:  N/A
+   Encoding considerations:  "binary"
+   Security considerations:  See Section 5
+   Interoperability considerations:  N/A
+   Published specification:  this document
+   Applications that use this media type:  This type identifies a bulk
+      report submission for the Distributed Aggregation Protocol.
+   Fragment identifier considerations:  N/A
+   Additional information:
+      Magic number(s):  N/A
+      Deprecated alias names for this type:  N/A
+      File extension(s):  N/A
+      Macintosh file type code(s):  N/A
+   Person and email address to contact for further information:
+      See Authors' Addresses section
+   Intended usage:  COMMON
+   Restrictions on usage:  N/A
+   Author:  See Authors' Addresses section
+   Change controller:  IETF
+
+7.  References
+
+7.1.  Normative References
+
+   [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
+              C. A. Wood, "Distributed Aggregation Protocol for Privacy
+              Preserving Measurement", Work in Progress, Internet-Draft,
+              draft-ietf-ppm-dap-12, 10 October 2024,
+              <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
+              12>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC6838]  Freed, N., Klensin, J., and T. Hansen, "Media Type
+              Specifications and Registration Procedures", BCP 13,
+              RFC 6838, DOI 10.17487/RFC6838, January 2013,
+              <https://www.rfc-editor.org/rfc/rfc6838>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+7.2.  Informative References
+
+   [DAP-DP-EXT]
+              Thomson, M., "Distributed Aggregation Protocol (DAP)
+              Extensions for Improved Application of Differential
+              Privacy", Work in Progress, Internet-Draft, draft-thomson-
+              ppm-dap-dp-ext-00, 17 October 2024,
+              <https://datatracker.ietf.org/doc/html/draft-thomson-ppm-
+              dap-dp-ext-00>.
+
+   [RFC9458]  Thomson, M. and C. A. Wood, "Oblivious HTTP", RFC 9458,
+              DOI 10.17487/RFC9458, January 2024,
+              <https://www.rfc-editor.org/rfc/rfc9458>.
+
+Acknowledgments
+
+   TODO acknowledge.
+
+Authors' Addresses
+
+   Martin Thomson
+   Mozilla
+   Email: mt@lowentropy.net
+
+
+   Alex Koshelev
+   Meta
+   Email: koshelev@meta.com
