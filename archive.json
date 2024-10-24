@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-22T00:38:38.233412+00:00",
+  "timestamp": "2024-10-24T00:38:04.032160+00:00",
   "repo": "martinthomson/dap-bulk",
   "labels": [
     {
@@ -65,6 +65,30 @@
       "updatedAt": "2024-10-18T06:56:26Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 2,
+      "id": "I_kwDONCEHjs6bX6yS",
+      "title": "How are common extensions applied to reports during aggregation?",
+      "url": "https://github.com/martinthomson/dap-bulk/issues/2",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "This draft saves communication during upload interaction between Clients (well, the HTTP client uploading many reports on behalf of the Clients) and the Leader by not re-transmitting the common extensions multiple times. I suspect it would be desirable avoid this during aggregation as well (i.e., the Leader->Helper interaction).\r\n\r\nWhich leads me to my question: how does the Leader convey the common extensions to the Helper? Does it just add them to each `ReportMetadata` in each aggregation job? Do we want to try and avoid this?\r\n\r\nInstead of adding an extension point to `ReportMetadata`, we could add it to the `AggregationJobInitReq`, thus sending it only once per aggregation job rather than once per report. We would just need to figure out how to incorporate this into the AAD for HPKE encryption.\r\n\r\n",
+      "createdAt": "2024-10-22T23:27:56Z",
+      "updatedAt": "2024-10-22T23:42:59Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "martinthomson",
+          "authorAssociation": "OWNER",
+          "body": "I hadn't considered changes to the internal protocol between aggregators.  There are some plausible reasons why you might not want to force batches to have consistent metadata though.\r\n\r\nOne potential approach for batching uses time so that helpers are able to more efficiently check for duplicates (we've talked about that in replay design).  If you force batching to use a consistent set of extensions, then you might end up degrading the helper's ability to delineate cleanly across a certain timestamp.\r\n\r\nThat could also be exactly what you want, because the replay protection is also delineated along the lines of those extensions (as many of the extensions in the [dap-dp-ext](https://github.com/martinthomson/dap-dp-ext) draft are design to enable).  But to force that might lead to suboptimal outcomes for those deployments.\r\n\r\nPerhaps the right thing to do is take a more comprehensive look at the anti-replay design and try to figure out where the cuts are.  Then the right way to optimize might become apparent.",
+          "createdAt": "2024-10-22T23:42:59Z",
+          "updatedAt": "2024-10-22T23:42:59Z"
+        }
+      ]
     }
   ],
   "pulls": []
