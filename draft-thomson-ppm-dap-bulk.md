@@ -127,9 +127,6 @@ override the value in the common extension.
 > but it's pretty cheap.
 > It also removes the last clause from the preceding paragraph.
 
-The header is followed by any number of reports,
-which are encoded exactly as described in {{DAP}},
-except as noted in {{changes}}.
 The use of `REPORT_COUNT` in {{syn-bulk-report}}
 is a small abuse of the TLS syntax to signify
 that any number of reports are included.
@@ -169,10 +166,7 @@ the availability of extensions that apply to any VDAF.
 
 # Security Considerations {#security}
 
-Report metadata,
-which would include the extensions
-if the recommendations in {{changes}} are adopted,
-are included in the additional associated data
+Report metadata are included in the additional associated data
 for every report.
 Bulk submission is therefore strictly a performance optimization
 as far as the operation of DAP is concerned.
