@@ -140,40 +140,6 @@ this format does not require that the size of all included reports
 be known before constructing a request.
 
 
-## Necessary Changes to DAP Report Formats {#changes}
-
-DAP currently encodes report extensions
-in the plaintext of shares.
-For extensions that contain public information
-this is inefficient for a couple of reasons:
-
-* Multiple copies of the data is included.
-
-* The use of per-record encryption prevents compression.
-
-This document recommends
-the addition of a new public report extensions field
-to the `ReportMetadata` structure.
-This would be modified to include extensions that are public,
-as shown in {{syn-metadata-change}}.
-
-~~~ tls-syntax
-struct {
-  ReportID report_id;
-  Time time;
-  Extension extensions<0..2^16-1>; /* new */
-} ReportMetadata;
-~~~
-{: #syn-metadata-change title="Proposed Report Metadata Format"}
-
-
-This would be sufficient for many extensions,
-such as those that are defined in {{?DAP-DP-EXT=I-D.thomson-ppm-dap-dp-ext}}.
-As with the current design ({{Section 4.5.3 of DAP}}),
-unknown extensions would result in the report being rejected.
-The primary difference being that the leader
-can determine this before initiating the preparation phase.
-
 ## Optional Removal of Existing Report Extensions {#removal}
 
 The existing report extensions could also potentially be removed,
