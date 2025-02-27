@@ -127,9 +127,6 @@ override the value in the common extension.
 > but it's pretty cheap.
 > It also removes the last clause from the preceding paragraph.
 
-The header is followed by any number of reports,
-which are encoded exactly as described in {{DAP}},
-except as noted in {{changes}}.
 The use of `REPORT_COUNT` in {{syn-bulk-report}}
 is a small abuse of the TLS syntax to signify
 that any number of reports are included.
@@ -139,40 +136,6 @@ as denoted with `&lt;` and `>`,
 this format does not require that the size of all included reports
 be known before constructing a request.
 
-
-## Necessary Changes to DAP Report Formats {#changes}
-
-DAP currently encodes report extensions
-in the plaintext of shares.
-For extensions that contain public information
-this is inefficient for a couple of reasons:
-
-* Multiple copies of the data is included.
-
-* The use of per-record encryption prevents compression.
-
-This document recommends
-the addition of a new public report extensions field
-to the `ReportMetadata` structure.
-This would be modified to include extensions that are public,
-as shown in {{syn-metadata-change}}.
-
-~~~ tls-syntax
-struct {
-  ReportID report_id;
-  Time time;
-  Extension extensions<0..2^16-1>; /* new */
-} ReportMetadata;
-~~~
-{: #syn-metadata-change title="Proposed Report Metadata Format"}
-
-
-This would be sufficient for many extensions,
-such as those that are defined in {{?DAP-DP-EXT=I-D.thomson-ppm-dap-dp-ext}}.
-As with the current design ({{Section 4.5.3 of DAP}}),
-unknown extensions would result in the report being rejected.
-The primary difference being that the leader
-can determine this before initiating the preparation phase.
 
 ## Optional Removal of Existing Report Extensions {#removal}
 
@@ -203,10 +166,7 @@ the availability of extensions that apply to any VDAF.
 
 # Security Considerations {#security}
 
-Report metadata,
-which would include the extensions
-if the recommendations in {{changes}} are adopted,
-are included in the additional associated data
+Report metadata are included in the additional associated data
 for every report.
 Bulk submission is therefore strictly a performance optimization
 as far as the operation of DAP is concerned.
