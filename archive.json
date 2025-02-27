@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-25T00:40:11.933102+00:00",
+  "timestamp": "2025-02-27T00:39:27.616900+00:00",
   "repo": "martinthomson/dap-bulk",
   "labels": [
     {
@@ -104,7 +104,7 @@
       "labels": [],
       "body": "The latest version of [DAP](https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-13#name-upload-request) includes the `public_extensions` field.\r\n\r\nWhen I open this draft on IETF tracker, I still see it referring to dap-12 which I don't know how to fix",
       "createdAt": "2025-01-23T19:05:16Z",
-      "updatedAt": "2025-01-23T19:46:19Z",
+      "updatedAt": "2025-02-26T17:39:26Z",
       "baseRepository": "martinthomson/dap-bulk",
       "baseRefName": "main",
       "baseRefOid": "158aa831394ee0d190168d63d9a3149226175818",
@@ -115,7 +115,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "akoshelev",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@martinthomson gentle nudge",
+          "createdAt": "2025-02-26T17:39:25Z",
+          "updatedAt": "2025-02-26T17:39:25Z"
+        }
+      ],
       "reviews": []
     }
   ]
