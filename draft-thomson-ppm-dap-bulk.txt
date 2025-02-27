@@ -5,8 +5,8 @@
 Privacy Preserving Measurement                                M. Thomson
 Internet-Draft                                                   Mozilla
 Intended status: Informational                               A. Koshelev
-Expires: 21 April 2025                                              Meta
-                                                         18 October 2024
+Expires: 31 August 2025                                             Meta
+                                                        27 February 2025
 
 
    Bulk Report Submission for Distributed Aggregation Protocol (DAP)
@@ -51,11 +51,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 April 2025.
+   This Internet-Draft will expire on 31 August 2025.
 
 Copyright Notice
 
-   Copyright (c) 2024 IETF Trust and the persons identified as the
+   Copyright (c) 2025 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -73,8 +73,7 @@ Table of Contents
    2.  Conventions and Definitions
    3.  Bulk Submissions Endpoint
    4.  Bulk Submission Format
-     4.1.  Necessary Changes to DAP Report Formats
-     4.2.  Optional Removal of Existing Report Extensions
+     4.1.  Optional Removal of Existing Report Extensions
    5.  Security Considerations
    6.  IANA Considerations
    7.  References
@@ -153,46 +152,17 @@ Table of Contents
       |  pretty cheap.  It also removes the last clause from the
       |  preceding paragraph.
 
-   The header is followed by any number of reports, which are encoded
-   exactly as described in [DAP], except as noted in Section 4.1.  The
-   use of REPORT_COUNT in Figure 1 is a small abuse of the TLS syntax to
-   signify that any number of reports are included.  This "value" could
-   be any positive integer.  Unlike a variable-length field, as denoted
-   with &lt; and >, this format does not require that the size of all
-   included reports be known before constructing a request.
+   The use of REPORT_COUNT in Figure 1 is a small abuse of the TLS
+   syntax to signify that any number of reports are included.  This
+   "value" could be any positive integer.  Unlike a variable-length
+   field, as denoted with &lt; and >, this format does not require that
+   the size of all included reports be known before constructing a
+   request.
 
-4.1.  Necessary Changes to DAP Report Formats
-
-   DAP currently encodes report extensions in the plaintext of shares.
-   For extensions that contain public information this is inefficient
-   for a couple of reasons:
-
-   *  Multiple copies of the data is included.
-
-   *  The use of per-record encryption prevents compression.
-
-   This document recommends the addition of a new public report
-   extensions field to the ReportMetadata structure.  This would be
-   modified to include extensions that are public, as shown in Figure 2.
-
-   struct {
-     ReportID report_id;
-     Time time;
-     Extension extensions<0..2^16-1>; /* new */
-   } ReportMetadata;
-
-                 Figure 2: Proposed Report Metadata Format
-
-   This would be sufficient for many extensions, such as those that are
-   defined in [DAP-DP-EXT].  As with the current design (Section 4.5.3
-   of [DAP]), unknown extensions would result in the report being
-   rejected.  The primary difference being that the leader can determine
-   this before initiating the preparation phase.
-
-4.2.  Optional Removal of Existing Report Extensions
+4.1.  Optional Removal of Existing Report Extensions
 
    The existing report extensions could also potentially be removed, as
-   shown in Figure 3.
+   shown in Figure 2.
 
    opaque PlaintextInputShare<0..2^32-1>;
 
@@ -203,7 +173,7 @@ Table of Contents
    } PlaintextInputShare;
    */
 
-                 Figure 3: Proposed Plaintext Share Format
+                 Figure 2: Proposed Plaintext Share Format
 
    These private extensions currently have no defined purpose and add
    two bytes per aggregator to every report.  The risk of removing them
@@ -214,11 +184,9 @@ Table of Contents
 
 5.  Security Considerations
 
-   Report metadata, which would include the extensions if the
-   recommendations in Section 4.1 are adopted, are included in the
-   additional associated data for every report.  Bulk submission is
-   therefore strictly a performance optimization as far as the operation
-   of DAP is concerned.
+   Report metadata are included in the additional associated data for
+   every report.  Bulk submission is therefore strictly a performance
+   optimization as far as the operation of DAP is concerned.
 
    The potential for a single client to generate large amounts of work
    for a DAP service is a serious threat to service availability.  Any
@@ -270,9 +238,9 @@ Table of Contents
    [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
               C. A. Wood, "Distributed Aggregation Protocol for Privacy
               Preserving Measurement", Work in Progress, Internet-Draft,
-              draft-ietf-ppm-dap-12, 10 October 2024,
+              draft-ietf-ppm-dap-14, 3 February 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              12>.
+              14>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -289,9 +257,6 @@ Table of Contents
               May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
 
 7.2.  Informative References
-
-   [DAP-DP-EXT]
-              "*** BROKEN REFERENCE ***".
 
    [RFC9458]  Thomson, M. and C. A. Wood, "Oblivious HTTP", RFC 9458,
               DOI 10.17487/RFC9458, January 2024,
