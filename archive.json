@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-27T00:39:27.616900+00:00",
+  "timestamp": "2025-03-02T00:42:49.248843+00:00",
   "repo": "martinthomson/dap-bulk",
   "labels": [
     {
@@ -89,6 +89,38 @@
           "updatedAt": "2024-10-22T23:42:59Z"
         }
       ]
+    },
+    {
+      "number": 4,
+      "id": "I_kwDONCEHjs6sJvo-",
+      "title": "Use existing upload endpoint with new content type",
+      "url": "https://github.com/martinthomson/dap-bulk/issues/4",
+      "state": "OPEN",
+      "author": "tgeoghegan",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "[Section 3](https://martinthomson.github.io/dap-bulk/draft-thomson-ppm-dap-bulk.html#section-3) and 4 stipulates that bulk uploads should use a new HTTP request path `{leader}/tasks/{task-id}/reports/bulk` with content type \"application/dap-bulk-report\". I think we could use the existing upload path with the new content type, and this would suffice for leader implementations to distinguish incoming messages and choose the appropriate handler.",
+      "createdAt": "2025-02-28T23:31:08Z",
+      "updatedAt": "2025-02-28T23:31:08Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 5,
+      "id": "I_kwDONCEHjs6sJv6y",
+      "title": "Section 4: Use of \"header\" is confusing",
+      "url": "https://github.com/martinthomson/dap-bulk/issues/5",
+      "state": "OPEN",
+      "author": "tgeoghegan",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 4 reads:\n\n> The \"application/dap-bulk-report\" format contains a header that encodes extensions that are common to all reports. The header is followed by any number of reports, from which those shared fields are removed.\n\n```\nstruct {\n  Extension common_extensions<0..2^16-1>;\n  Report report[REPORT_COUNT];\n} BulkReport;\n```\n This is confusing: \"header\" implies an HTTP header, but `common_extensions` is depicted as a field of `BulkReport` which is in the HTTP request body.",
+      "createdAt": "2025-02-28T23:32:28Z",
+      "updatedAt": "2025-02-28T23:32:28Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -97,24 +129,26 @@
       "id": "PR_kwDONCEHjs6Izg2c",
       "title": "Remove the section 4.1: Necessary Changes to DAP Report Formats",
       "url": "https://github.com/martinthomson/dap-bulk/pull/3",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "akoshelev",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "The latest version of [DAP](https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-13#name-upload-request) includes the `public_extensions` field.\r\n\r\nWhen I open this draft on IETF tracker, I still see it referring to dap-12 which I don't know how to fix",
       "createdAt": "2025-01-23T19:05:16Z",
-      "updatedAt": "2025-02-26T17:39:26Z",
+      "updatedAt": "2025-02-27T02:56:10Z",
       "baseRepository": "martinthomson/dap-bulk",
       "baseRefName": "main",
       "baseRefOid": "158aa831394ee0d190168d63d9a3149226175818",
       "headRepository": "akoshelev/dap-bulk",
       "headRefName": "akoshelev-patch-1",
       "headRefOid": "3b481d5cb2c57c66e5abf7991d1b8895ec08c60a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-02-27T02:56:10Z",
+      "mergedAt": "2025-02-27T02:56:10Z",
+      "mergedBy": "martinthomson",
+      "mergeCommit": {
+        "oid": "80594c49494974adefe75842c242238997fb2820"
+      },
       "comments": [
         {
           "author": "akoshelev",
@@ -124,7 +158,21 @@
           "updatedAt": "2025-02-26T17:39:25Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDONCEHjs6dvYgQ",
+          "commit": {
+            "abbreviatedOid": "3b481d5"
+          },
+          "author": "martinthomson",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "My bad, I missed this in the flood.",
+          "createdAt": "2025-02-27T02:56:01Z",
+          "updatedAt": "2025-02-27T02:56:01Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
