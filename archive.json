@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-04T00:40:22.162350+00:00",
+  "timestamp": "2025-03-06T00:40:09.364508+00:00",
   "repo": "martinthomson/dap-bulk",
   "labels": [
     {
@@ -95,16 +95,31 @@
       "id": "I_kwDONCEHjs6sJvo-",
       "title": "Use existing upload endpoint with new content type",
       "url": "https://github.com/martinthomson/dap-bulk/issues/4",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "tgeoghegan",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "[Section 3](https://martinthomson.github.io/dap-bulk/draft-thomson-ppm-dap-bulk.html#section-3) and 4 stipulates that bulk uploads should use a new HTTP request path `{leader}/tasks/{task-id}/reports/bulk` with content type \"application/dap-bulk-report\". I think we could use the existing upload path with the new content type, and this would suffice for leader implementations to distinguish incoming messages and choose the appropriate handler.",
       "createdAt": "2025-02-28T23:31:08Z",
-      "updatedAt": "2025-02-28T23:31:08Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-03-05T17:09:29Z",
+      "closedAt": "2025-03-05T17:09:29Z",
+      "comments": [
+        {
+          "author": "martinthomson",
+          "authorAssociation": "OWNER",
+          "body": "I made that choice because it gives the greatest flexibility to implementations.  I know that some implementations might be happy to accept bulk submissions at the same URL, but is there a reason why we should force implementations to do that?",
+          "createdAt": "2025-03-05T10:20:56Z",
+          "updatedAt": "2025-03-05T10:20:56Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "NONE",
+          "body": "That's a good point. And it occurs to me now that in most frameworks for writing HTTP servers, it's pretty easy to hook up the same handler to multiple paths. So long as we make sure that the bulk upload path contains the same variables as the non-bulk path, then this is fine.",
+          "createdAt": "2025-03-05T17:09:29Z",
+          "updatedAt": "2025-03-05T17:09:29Z"
+        }
+      ]
     },
     {
       "number": 5,
@@ -118,9 +133,48 @@
       "labels": [],
       "body": "Section 4 reads:\n\n> The \"application/dap-bulk-report\" format contains a header that encodes extensions that are common to all reports. The header is followed by any number of reports, from which those shared fields are removed.\n\n```\nstruct {\n  Extension common_extensions<0..2^16-1>;\n  Report report[REPORT_COUNT];\n} BulkReport;\n```\n This is confusing: \"header\" implies an HTTP header, but `common_extensions` is depicted as a field of `BulkReport` which is in the HTTP request body.",
       "createdAt": "2025-02-28T23:32:28Z",
-      "updatedAt": "2025-02-28T23:32:28Z",
+      "updatedAt": "2025-03-05T17:45:06Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "martinthomson",
+          "authorAssociation": "OWNER",
+          "body": "Ugh, of course.  Thanks for pointing that out.  We'll have to work out how to manage that confusion.",
+          "createdAt": "2025-03-05T10:21:28Z",
+          "updatedAt": "2025-03-05T10:21:28Z"
+        },
+        {
+          "author": "akoshelev",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Would *prologue* be a an good alternative here? \n\nOr maybe we can to use something like \"bulk report header\" to avoid confusion",
+          "createdAt": "2025-03-05T17:45:05Z",
+          "updatedAt": "2025-03-05T17:45:05Z"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "I_kwDONCEHjs6sxdNS",
+      "title": "Should this draft prescribe the maximum number of reports in a single upload?",
+      "url": "https://github.com/martinthomson/dap-bulk/issues/6",
+      "state": "OPEN",
+      "author": "akoshelev",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Specifically, should we specify [`REPORT_COUNT`](https://datatracker.ietf.org/doc/html/draft-thomson-ppm-dap-bulk#name-bulk-submission-format) type or leave it out as an implementation detail? ",
+      "createdAt": "2025-03-05T22:07:51Z",
+      "updatedAt": "2025-03-05T22:09:26Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "akoshelev",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I am thinking that $$2^{32}-1$$ may be a reasonable upper bound",
+          "createdAt": "2025-03-05T22:09:24Z",
+          "updatedAt": "2025-03-05T22:09:24Z"
+        }
+      ]
     }
   ],
   "pulls": [
