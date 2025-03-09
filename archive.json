@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-06T00:40:09.364508+00:00",
+  "timestamp": "2025-03-09T00:35:41.126463+00:00",
   "repo": "martinthomson/dap-bulk",
   "labels": [
     {
@@ -162,9 +162,9 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "Specifically, should we specify [`REPORT_COUNT`](https://datatracker.ietf.org/doc/html/draft-thomson-ppm-dap-bulk#name-bulk-submission-format) type or leave it out as an implementation detail? ",
+      "body": "Specifically, should we specify [`REPORT_COUNT`](https://datatracker.ietf.org/doc/html/draft-thomson-ppm-dap-bulk#name-bulk-submission-format) type or leave it out as an implementation detail? \n\nCurrent proposal states that the number of reports submitted may not be known ahead of time. \n\n> Unlike a variable-length field, as denoted with &lt; and >, this format does not require that the size of all included reports be known before constructing a request.\n\nThe idea of not requiring REPORT_COUNT to be provided ahead of time is attractive and simplifies things on the client side. However, a reasonable limit will likely be required for practical deployments as it is probably a bad idea to submit terrabytes of data to the backend.\n\nServers can choose to terminate the connection when the upper limit is reached. With that in mind, it also feels right to have an optional `size_hint` field that serves the same purpose as in Rust's Iterator interface. That way, clients may get an early signal that their upload is busted before they even start doing heavy lifting work. \n\nThe latter can probably be taken out of scope for this draft and put as a future improvement\n\n",
       "createdAt": "2025-03-05T22:07:51Z",
-      "updatedAt": "2025-03-05T22:09:26Z",
+      "updatedAt": "2025-03-06T05:36:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -190,7 +190,7 @@
       "labels": [],
       "body": "The latest version of [DAP](https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-13#name-upload-request) includes the `public_extensions` field.\r\n\r\nWhen I open this draft on IETF tracker, I still see it referring to dap-12 which I don't know how to fix",
       "createdAt": "2025-01-23T19:05:16Z",
-      "updatedAt": "2025-02-27T02:56:10Z",
+      "updatedAt": "2025-03-06T01:17:36Z",
       "baseRepository": "martinthomson/dap-bulk",
       "baseRefName": "main",
       "baseRefOid": "158aa831394ee0d190168d63d9a3149226175818",
