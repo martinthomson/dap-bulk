@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-09T00:35:41.126463+00:00",
+  "timestamp": "2025-03-11T00:40:28.304565+00:00",
   "repo": "martinthomson/dap-bulk",
   "labels": [
     {
@@ -164,7 +164,7 @@
       "labels": [],
       "body": "Specifically, should we specify [`REPORT_COUNT`](https://datatracker.ietf.org/doc/html/draft-thomson-ppm-dap-bulk#name-bulk-submission-format) type or leave it out as an implementation detail? \n\nCurrent proposal states that the number of reports submitted may not be known ahead of time. \n\n> Unlike a variable-length field, as denoted with &lt; and >, this format does not require that the size of all included reports be known before constructing a request.\n\nThe idea of not requiring REPORT_COUNT to be provided ahead of time is attractive and simplifies things on the client side. However, a reasonable limit will likely be required for practical deployments as it is probably a bad idea to submit terrabytes of data to the backend.\n\nServers can choose to terminate the connection when the upper limit is reached. With that in mind, it also feels right to have an optional `size_hint` field that serves the same purpose as in Rust's Iterator interface. That way, clients may get an early signal that their upload is busted before they even start doing heavy lifting work. \n\nThe latter can probably be taken out of scope for this draft and put as a future improvement\n\n",
       "createdAt": "2025-03-05T22:07:51Z",
-      "updatedAt": "2025-03-06T05:36:54Z",
+      "updatedAt": "2025-03-10T05:03:46Z",
       "closedAt": null,
       "comments": [
         {
@@ -173,6 +173,13 @@
           "body": "I am thinking that $$2^{32}-1$$ may be a reasonable upper bound",
           "createdAt": "2025-03-05T22:09:24Z",
           "updatedAt": "2025-03-05T22:09:24Z"
+        },
+        {
+          "author": "martinthomson",
+          "authorAssociation": "OWNER",
+          "body": "It does already define it: as any positive integer.  Is there a reason why this needs to be specified more tightly?  I figure that implementations will have limits on what they are willing to accept, but we don't need to button that down in a spec.\n\nThe more interesting question for me is whether a server can accept a bulk report in streaming fashion and then give up at some point.  If it can, then is there any value in signaling how much of the input it accepted (so that a client can try again with any remainder).  That seems unlikely to be a problem in practice (servers can publish their limits and clients can simply abide by them), but maybe we can at least say something about that.",
+          "createdAt": "2025-03-10T05:03:46Z",
+          "updatedAt": "2025-03-10T05:03:46Z"
         }
       ]
     }
