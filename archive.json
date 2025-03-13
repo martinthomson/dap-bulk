@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-11T00:40:28.304565+00:00",
+  "timestamp": "2025-03-13T00:40:51.135913+00:00",
   "repo": "martinthomson/dap-bulk",
   "labels": [
     {
@@ -164,7 +164,7 @@
       "labels": [],
       "body": "Specifically, should we specify [`REPORT_COUNT`](https://datatracker.ietf.org/doc/html/draft-thomson-ppm-dap-bulk#name-bulk-submission-format) type or leave it out as an implementation detail? \n\nCurrent proposal states that the number of reports submitted may not be known ahead of time. \n\n> Unlike a variable-length field, as denoted with &lt; and >, this format does not require that the size of all included reports be known before constructing a request.\n\nThe idea of not requiring REPORT_COUNT to be provided ahead of time is attractive and simplifies things on the client side. However, a reasonable limit will likely be required for practical deployments as it is probably a bad idea to submit terrabytes of data to the backend.\n\nServers can choose to terminate the connection when the upper limit is reached. With that in mind, it also feels right to have an optional `size_hint` field that serves the same purpose as in Rust's Iterator interface. That way, clients may get an early signal that their upload is busted before they even start doing heavy lifting work. \n\nThe latter can probably be taken out of scope for this draft and put as a future improvement\n\n",
       "createdAt": "2025-03-05T22:07:51Z",
-      "updatedAt": "2025-03-10T05:03:46Z",
+      "updatedAt": "2025-03-11T04:27:55Z",
       "closedAt": null,
       "comments": [
         {
@@ -180,6 +180,34 @@
           "body": "It does already define it: as any positive integer.  Is there a reason why this needs to be specified more tightly?  I figure that implementations will have limits on what they are willing to accept, but we don't need to button that down in a spec.\n\nThe more interesting question for me is whether a server can accept a bulk report in streaming fashion and then give up at some point.  If it can, then is there any value in signaling how much of the input it accepted (so that a client can try again with any remainder).  That seems unlikely to be a problem in practice (servers can publish their limits and clients can simply abide by them), but maybe we can at least say something about that.",
           "createdAt": "2025-03-10T05:03:46Z",
           "updatedAt": "2025-03-10T05:03:46Z"
+        },
+        {
+          "author": "akoshelev",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> The more interesting question for me is whether a server can accept a bulk report in streaming fashion and then give up at some point. \n\nThat is one scenario that I had to consider and that led me to open this issue. For large uploads (more than a thousand), it is worth to avoid retrying the entire bulk upload request in case of failure which may be outside of server/client control (network, host, etc). Signal back how much is accepted is currently in the proposal for bulk upload\n\nhttps://akoshelev.github.io/draft-ietf-ppm-dap/dap-bulk/draft-ietf-ppm-dap.html#name-partial-failures",
+          "createdAt": "2025-03-11T03:04:55Z",
+          "updatedAt": "2025-03-11T03:04:55Z"
+        },
+        {
+          "author": "martinthomson",
+          "authorAssociation": "OWNER",
+          "body": "The alternative here is to support [resumable uploads](https://httpwg.org/http-extensions/draft-ietf-httpbis-resumable-upload.html), which - in effect - allow the upload to be broken into pieces and restarted from any break.  That doesn't involve new work, either.",
+          "createdAt": "2025-03-11T03:50:16Z",
+          "updatedAt": "2025-03-11T03:50:16Z"
+        },
+        {
+          "author": "akoshelev",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Byte counting is really neat and it is great that we can rely on a standard. This won't allow the server to signal rejected reports however. Do you think we can ignore those? ",
+          "createdAt": "2025-03-11T04:05:11Z",
+          "updatedAt": "2025-03-11T04:05:11Z"
+        },
+        {
+          "author": "martinthomson",
+          "authorAssociation": "OWNER",
+          "body": "Rejections are probably useful yeah.  If you follow the resumable uploads model, you would have a separate resource that you can query to get a list of the rejected reports, rather than having it as part of the response.",
+          "createdAt": "2025-03-11T04:27:54Z",
+          "updatedAt": "2025-03-11T04:27:54Z"
         }
       ]
     }
